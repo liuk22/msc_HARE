@@ -1,5 +1,10 @@
+
+import os 
+
 class Log: 
+
     def __init__(self, full_path=None, unix_file=False): 
+
         self.experiment_name = None
         self.timestamp = None
         self.stage = None
