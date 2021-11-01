@@ -8,7 +8,8 @@ class Log:
         self.experiment_name = None
         self.timestamp = None
         self.stage = None
-        self.threshold = None
+        self.unit = None 
+        self.unit_value = None
         self.path = full_path 
         self.unix_file = unix_file
         if full_path is not None: 

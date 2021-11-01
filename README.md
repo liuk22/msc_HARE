@@ -20,12 +20,15 @@ Provided a ROS topic containing an OccupancyGrid that a given robot exploration 
 Experiment snapshots are highly configurable in when they occur and bounds can be set on the particular occupancy grid to scale borders that are not desired for exploration such as thicker outside walls or outside areas of the simulated/physical environment. Below is the JSON schema: 
 ```
 {
-    "units": ""
+    "experiment_name": "",
+    "units": "",
     "stages": [],
     "map_bounds_x": [],
     "map_bounds_y": []
 }
 ```
+
+```"experiment_name"``` must be a string that is a valid UNIX directory name. It will be the parent directory containing logs associated with a particular experiment. Logs may become polluted in aggregate if you reuse the same name without removing prior logs. 
 
 ```"unit"``` must be a string of value either ```"second"``` or ```"proportion"```. 
 

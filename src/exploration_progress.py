@@ -22,6 +22,7 @@ STAGES = {key : False for key in keys}
 SAMPLING_PERIOD = 1
 
 TIME_LAST = 0
+TIME_FIRST = 0
 
 def callback(message):
     if rospy.get_time() - TIME_LAST < SAMPLING_PERIOD:  
@@ -43,8 +44,16 @@ def callback(message):
         for i, k in enumerate(sorted(STAGES.keys())): 
             if not STAGES[k] and k <= fraction_mapped:
                 STAGES[k] = True 
-                log_file(map_grid, i, k) 
+                log_file_proportion(map_grid, i, k) 
                 break 
+    elif config_file["unit"] == "second":
+        global STAGES
+        global TIME_FIRST
+        for i, k in enumerate(sorted(STAGES.keys())): 
+            if not STAGES[k] and k <= rospy.get_time().secs - TIME_FIRST.secs:
+                STAGES[k] = True 
+                log_file_second(map_grid, i, k)
+                break  
     if all(STAGES.values()): 
         os.system("rosnode kill --all")
 
@@ -52,10 +61,17 @@ def callback(message):
     TIME_LAST = rospy.get_time()
 
 
-def log_file(grid_as_np, stage_num, stage_thresh): 
+def log_file_second(grid_as_np, stage_num, stage_second): 
     named_tuple = time.localtime() # get struct_time
     log_name = "{}{}".format(LOG_FOLDER_PATH, time.strftime("%m-%d-%YT%H-%M-%S", named_tuple))
-    log_name += "_stage{}_thresh{}.txt".format(stage_num, int(stage_thresh * 100))
+    log_name += "_stage{}_second{}.txt".format(stage_num, int(stage_second * 100))
+    with open(log_name, 'w') as fh: 
+        np.savetxt(fh, grid_as_np, fmt='%3.4f')
+
+def log_file_proportion(grid_as_np, stage_num, stage_proportion): 
+    named_tuple = time.localtime() # get struct_time
+    log_name = "{}{}".format(LOG_FOLDER_PATH, time.strftime("%m-%d-%YT%H-%M-%S", named_tuple))
+    log_name += "_stage{}_proportion{}.txt".format(stage_num, int(stage_proportion * 100))
     with open(log_name, 'w') as fh: 
         np.savetxt(fh, grid_as_np, fmt='%3.4f')
 
@@ -65,6 +81,8 @@ def node():
     map_topic = rospy.get_param("~map_topic", "map")
     global TIME_LAST
     TIME_LAST = rospy.get_time()
+    global TIME_FIRST
+    TIME_FIRST = TIME_LAST
     rospy.Subscriber(map_topic, OccupancyGrid, callback)
     rospy.spin()
 
