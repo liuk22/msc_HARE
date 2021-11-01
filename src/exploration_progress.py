@@ -4,25 +4,22 @@ from nav_msgs.msg import OccupancyGrid
 import time 
 import numpy as np
 import os
+import json
 
-
-ADJUSTED_MAP_BOUNDS = (50, 50, 350, 350) # x1, y1, x2, y2 of rectangular bounds of explorable indoor
-STAGES = {0.001: False, 
-    0.1 : False, 
-    0.2 : False,
-    0.3 : False, 
-    0.4 : False, 
-    0.5 : False, 
-    0.6 : False, 
-    0.7 : False, 
-    0.8 : False, 
-    0.9 : False}
-
-SAMPLING_PERIOD = 1
-OCCUPIED_THRESH = 0.65
-FREE_THRESH = 0.196
+CONFIG_FOLDER_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/../configuration/exploration_progress_config.json"
 LOG_FOLDER_PATH = f"{os.path.dirname(os.path.realpath(__file__))}../logs/heatmaps/"
 
+config_file = None
+with open(CONFIG_FOLDER_PATH) as fh: 
+    config_file = json.load(fh)
+
+if config_file["unit"] == "second": 
+    keys = sorted(map(int, config_file["stages"]))
+elif config_file["unit"] == "proportion":
+    keys = sorted(map(float, config_file["stages"]))
+STAGES = {key : False for key in keys}
+
+SAMPLING_PERIOD = 1
 
 TIME_LAST = 0
 
@@ -30,20 +27,24 @@ def callback(message):
     if rospy.get_time() - TIME_LAST < SAMPLING_PERIOD:  
         return 
     map_grid = np.reshape(message.data, (message.info.height, message.info.width))
-    x1, x2 = ADJUSTED_MAP_BOUNDS[0], ADJUSTED_MAP_BOUNDS[2]
-    y1, y2 = ADJUSTED_MAP_BOUNDS[1], ADJUSTED_MAP_BOUNDS[3]
-    map_grid_adjusted = map_grid[x1:x2, y1:y2]
-
-    num_grid_squares = np.abs((x1 - x2) * (y1 - y2))
-    num_unmapped_squares = np.sum(map_grid_adjusted < 0)
-    fraction_mapped = 1.0 - (float(num_unmapped_squares) / float(num_grid_squares))
-    
-    global STAGES  
-    for i, k in enumerate(sorted(list(STAGES.keys()))): 
-        if not STAGES[k] and k <= fraction_mapped:
-            STAGES[k] = True 
-            log_file(map_grid_adjusted, i, k) 
-            break 
+    x1, x2 = 0, map_grid.shape[0]
+    y1, y2 = 0, map_grid.shape[1]
+    if len(config_file["map_bounds_x"]) == 2: 
+        x1, x2 = config_file["map_bounds_x"][0], config_file["map_bounds_x"][1]
+    if len(config_file["map_bounds_y"]) == 2: 
+        y1, y2 =  config_file["map_bounds_y"][0],  config_file["map_bounds_y"][1]
+    map_grid = map_grid[x1:x2, y1:y2]
+    if config_file["unit"] == "proportion":  
+        num_grid_squares = np.abs((x1 - x2) * (y1 - y2))
+        num_unmapped_squares = np.sum(map_grid < 0)
+        fraction_mapped = 1.0 - (float(num_unmapped_squares) / float(num_grid_squares))
+        
+        global STAGES  
+        for i, k in enumerate(sorted(STAGES.keys())): 
+            if not STAGES[k] and k <= fraction_mapped:
+                STAGES[k] = True 
+                log_file(map_grid, i, k) 
+                break 
     if all(STAGES.values()): 
         os.system("rosnode kill --all")
 

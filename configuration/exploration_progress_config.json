@@ -1,0 +1,6 @@
+{
+    "unit":"second",
+    "stages": [1, 30, 60, 90, 120, 150],
+    "map_bounds_x": [],
+    "map_bounds_y": []
+}
