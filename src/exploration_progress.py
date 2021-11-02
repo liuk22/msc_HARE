@@ -7,16 +7,19 @@ import os
 import json
 
 CONFIG_FOLDER_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/../configuration/exploration_progress_config.json"
-LOG_FOLDER_PATH = f"{os.path.dirname(os.path.realpath(__file__))}../logs/heatmaps/"
 
 config_file = None
 with open(CONFIG_FOLDER_PATH) as fh: 
     config_file = json.load(fh)
 
+
 if config_file["unit"] == "second": 
     keys = sorted(map(int, config_file["stages"]))
 elif config_file["unit"] == "proportion":
     keys = sorted(map(float, config_file["stages"]))
+exp_name = config_file["experiment_name"]
+LOG_FOLDER_PATH = f"{os.path.dirname(os.path.realpath(__file__))}../logs/heatmaps/{exp_name}/"
+
 STAGES = {key : False for key in keys}
 
 SAMPLING_PERIOD = 1
@@ -79,6 +82,8 @@ def log_file_proportion(grid_as_np, stage_num, stage_proportion):
 def node(): 
     rospy.init_node('exploration_progress', anonymous=True)
     map_topic = rospy.get_param("~map_topic", "map")
+    rospy.wait_for_message(map_topic)
+    
     global TIME_LAST
     TIME_LAST = rospy.get_time()
     global TIME_FIRST

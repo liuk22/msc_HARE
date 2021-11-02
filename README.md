@@ -4,7 +4,7 @@
 Provided a ROS topic containing an OccupancyGrid that a given robot exploration experiment updates continuously, HARE takes snapshots of the OccupancyGrid at user-defined stages exploration and logs them to ```logs/heatmaps``` under the experiment's name. These snapshots of progress are aggregated across trials of the same experiment methodology to form heatmaps and visualizations viewable through the Jupyter Notebook ```scripts/analyzer.ipynb```. 
 
 # Examples
-
+![Proportion Snapshots in Subplots](media/fazildgr8_proportion_subplot.png)
 
 # Usage 
 ## Overview

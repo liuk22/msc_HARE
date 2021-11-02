@@ -1,7 +1,7 @@
 {
     "experiment_name": "fazildgr8_time",
     "unit":"second",
-    "stages": [1, 30, 60, 90, 120, 150],
-    "map_bounds_x": [],
-    "map_bounds_y": []
+    "stages": [1, 30, 60, 90, 120],
+    "map_bounds_x": [50, 350],
+    "map_bounds_y": [50, 350]
 }
