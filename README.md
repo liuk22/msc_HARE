@@ -41,7 +41,14 @@ Experiment snapshots are highly configurable in when they occur and bounds can b
 
 ### Launch File Usage
 
+You can easily setup the snapshot-making ```exploration_progress.py``` node as ROSNode initiated from a given ROS Launch file. It must have access to the map topic through a correct parameter.
 
+```
+</node>
+  <node pkg="msc_HARE" type="exploration_progress.py" name="exploration_progress">
+  <param name="map_topic" value="/map"/>
+</node> 
+```
 
 # Dependencies 
 Jupyter Notebook analysis must be done in Python3, while this package is designed for ROS Kinetic which uses Python2. 
