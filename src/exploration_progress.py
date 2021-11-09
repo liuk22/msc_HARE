@@ -67,7 +67,7 @@ def callback(message):
 def log_file_second(grid_as_np, stage_num, stage_second): 
     named_tuple = time.localtime() # get struct_time
     log_name = "{}{}".format(LOG_FOLDER_PATH, time.strftime("%m-%d-%YT%H-%M-%S", named_tuple))
-    log_name += "_stage{}_second{}.txt".format(stage_num, int(stage_second * 100))
+    log_name += "_stage{}_second{}.txt".format(stage_num, int(stage_second))
     try:
         os.makedirs(os.path.dirname(log_name))
     except OSError as e: 
