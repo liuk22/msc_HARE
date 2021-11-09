@@ -5,7 +5,7 @@ Provided a ROS topic containing an OccupancyGrid that a given robot exploration 
 
 # Examples
 ![Proportion Snapshots in Subplots](media/fazildgr8_proportion_subplot.png)
-
+![Time Snapshots in Subplots](media/fazildgr8_time_subplot.png)
 # Usage 
 ## Overview
 1. Clone HARE to your catkin workspace's ```src``` directory. 

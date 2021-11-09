@@ -54,7 +54,7 @@ class Analysis:
         style={"description_width": "initial"}),
         )
 
-    def generate_visualizations(self):
+    def generate_visualizations(self, save_fig_to=None):
         for i in range(len(self.selected_experiments)):
             exp_name = self.selected_experiments[i]
             experiment_path_matcher = f"{self.all_logs_path[:-1]}{exp_name}/*.txt"
@@ -82,3 +82,5 @@ class Analysis:
                 else:
                     axs[i].set_title(f"Robot Environment Exploration at Stage {i}, {log_objects[i * num_trials].unit_value} Proportion Explored")
                 plt.colorbar(plot_i, ax=axs[i], label="Frequentist Probability of Area Explored by Experiment Method")
+                if save_fig_to:
+                    plt.savefig(save_fig_to)
