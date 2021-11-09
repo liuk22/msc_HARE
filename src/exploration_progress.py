@@ -6,7 +6,7 @@ import numpy as np
 import os
 import json
 
-CONFIG_FOLDER_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/../configuration/exploration_progress_config.json"
+CONFIG_FOLDER_PATH = "%s/../configuration/exploration_progress_config.json" % os.path.dirname(os.path.realpath(__file__))
 
 config_file = None
 with open(CONFIG_FOLDER_PATH) as fh: 
@@ -18,7 +18,7 @@ if config_file["unit"] == "second":
 elif config_file["unit"] == "proportion":
     keys = sorted(map(float, config_file["stages"]))
 exp_name = config_file["experiment_name"]
-LOG_FOLDER_PATH = f"{os.path.dirname(os.path.realpath(__file__))}../logs/heatmaps/{exp_name}/"
+LOG_FOLDER_PATH = "%s/logs/heatmaps/%s/" % (os.path.dirname(os.path.dirname(os.path.realpath(__file__))), exp_name)
 
 STAGES = {key : False for key in keys}
 
@@ -53,7 +53,7 @@ def callback(message):
         global STAGES
         global TIME_FIRST
         for i, k in enumerate(sorted(STAGES.keys())): 
-            if not STAGES[k] and k <= rospy.get_time().secs - TIME_FIRST.secs:
+            if not STAGES[k] and k <= rospy.get_time() - TIME_FIRST:
                 STAGES[k] = True 
                 log_file_second(map_grid, i, k)
                 break  
@@ -68,6 +68,10 @@ def log_file_second(grid_as_np, stage_num, stage_second):
     named_tuple = time.localtime() # get struct_time
     log_name = "{}{}".format(LOG_FOLDER_PATH, time.strftime("%m-%d-%YT%H-%M-%S", named_tuple))
     log_name += "_stage{}_second{}.txt".format(stage_num, int(stage_second * 100))
+    try:
+        os.makedirs(os.path.dirname(log_name))
+    except OSError as e: 
+        pass 
     with open(log_name, 'w') as fh: 
         np.savetxt(fh, grid_as_np, fmt='%3.4f')
 
@@ -75,6 +79,10 @@ def log_file_proportion(grid_as_np, stage_num, stage_proportion):
     named_tuple = time.localtime() # get struct_time
     log_name = "{}{}".format(LOG_FOLDER_PATH, time.strftime("%m-%d-%YT%H-%M-%S", named_tuple))
     log_name += "_stage{}_proportion{}.txt".format(stage_num, int(stage_proportion * 100))
+    try:
+        os.makedirs(os.path.dirname(log_name))
+    except OSError as e: 
+        pass 
     with open(log_name, 'w') as fh: 
         np.savetxt(fh, grid_as_np, fmt='%3.4f')
 
@@ -82,7 +90,7 @@ def log_file_proportion(grid_as_np, stage_num, stage_proportion):
 def node(): 
     rospy.init_node('exploration_progress', anonymous=True)
     map_topic = rospy.get_param("~map_topic", "map")
-    rospy.wait_for_message(map_topic)
+    rospy.wait_for_message(map_topic, OccupancyGrid)
     
     global TIME_LAST
     TIME_LAST = rospy.get_time()
